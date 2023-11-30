@@ -30,7 +30,7 @@ app.route('/').get((req, res) => {
 const PORT = process.env.PORT || 3000;
 
 myDB(async client => {
-  const myDataBase = await client.db('database').collection('users');
+  const myDataBase = await client.db('cluster1').collection('users');
 
   app.route('/').get((req, res) => {
     res.render('index', {
