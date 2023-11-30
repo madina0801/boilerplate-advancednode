@@ -6,7 +6,6 @@ const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const session = require('express-session');
 const passport = require('passport');
 const {ObjectID} = require('mongodb');
-const database = process.env.MONGO_URI;
 const app = express();
 
 fccTesting(app); //For FCC testing purposes
@@ -33,7 +32,7 @@ app.route('/').get((req, res) => {
 const PORT = process.env.PORT || 3000;
 
 myDB(async client => {
-  const myDataBase = await client.db(database).collection('users');
+  const myDataBase = await client.db('database').collection('users');
 
   app.route('/').get((req, res) => {
     res.render('index', {
