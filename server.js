@@ -46,6 +46,7 @@ myDB(async client => {
       title: 'Connected to Database',
       message: 'Please login',
       showLogin: true,
+      showRegistration: true
     });
   });
 
@@ -62,6 +63,32 @@ myDB(async client => {
       username: req.user.username
     })
   });
+
+  app.route('/register').post((req, res, next) => {
+    myDataBase.findOne({ username: req.user.username }, (err, user) => {
+      if (err) {
+        next(err)
+      } else if (user) {
+        res.redirect('/')
+      } else {
+        myDataBase.insertOne({
+          username: req.body.username,
+          password: req.body.password
+        },
+          (err, doc) => {
+            if (err) {
+              res.redirect('/')
+            } else {
+              next(null, doc.ops[0]);
+            }
+          })
+      }
+    })
+  },
+    passport.authenticate('local', {
+      failureRedirect: '/'
+    }),
+  )
 
   app.route('/logout').get((req, res) => {
     req.logout();
