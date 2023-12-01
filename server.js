@@ -39,8 +39,6 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/');
 };
 
-const hash = bcrypt.hashSync(req.body.password, 12);
-
 myDB(async client => {
   const myDataBase = await client.db('cluster1').collection('users');
 
@@ -68,6 +66,7 @@ myDB(async client => {
   });
 
   app.route('/register').post((req, res, next) => {
+    const hash = bcrypt.hashSync(req.body.password, 12);
     myDataBase.findOne({ username: req.user.username }, (err, user) => {
       if (err) {
         next(err)
