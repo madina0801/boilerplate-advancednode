@@ -65,7 +65,7 @@ myDB(async client => {
 
   app.route('/logout').get((req, res) => {
     req.logout();
-    req.redirect('/');
+    res.redirect('/');
   });
 
   app.use((req, res, next) => {
