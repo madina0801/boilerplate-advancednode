@@ -55,13 +55,22 @@ myDB(async client => {
     }),
     (req, res) => {
       res.redirect('/profile')
-    })
+    });
 
   app.route('/profile').get(ensureAuthenticated, (req, res) => {
     res.render('profile', {
       username: req.user.username
     })
-  })
+  });
+
+  app.route('/logout').get((req, res) => {
+    req.logout();
+    req.redirect('/');
+  });
+
+  app.use((req, res, next) => {
+    res.status(404).type('text').send('Not Found');
+  });
 
   passport.serializeUser((user, done) => {
     done(null, user._id);
