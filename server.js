@@ -39,6 +39,13 @@ myDB(async client => {
   
   routes(app, myDataBase);
   auth(app, myDataBase);
+
+  let currentUsers = 0;
+  io.on('connect', (socket) => {
+    ++currentUsers;
+    io.emit('user count', currentUsers);
+    console.log('A user has connected!');
+  })
 }).catch(e => {
   app.route('/').get((req, res) => {
     res.render('index', { title: e, message: 'Unable to connect to database' });
