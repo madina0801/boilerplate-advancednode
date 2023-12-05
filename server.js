@@ -6,6 +6,13 @@ const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const session = require('express-session');
 const passport = require('passport');
 
+const passportSocketIo = require('passport.socketio');
+const MongoStore = require('connect-mongo')(session);
+const cookieParser = require('cookie-parser');
+
+const URI = process.env.MONGO_URI;
+const store = new MongoStore({ uri: URI });
+
 const routes = require('./routes.js');
 const auth = require('./auth.js');
 
@@ -22,7 +29,9 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { secure: false },
+  key: 'express.sid',
+  store: store,
 }));
 
 app.set('view engine', 'pug');
@@ -36,7 +45,7 @@ const PORT = process.env.PORT || 3000;
 
 myDB(async client => {
   const myDataBase = await client.db('cluster1').collection('users');
-  
+
   routes(app, myDataBase);
   auth(app, myDataBase);
 
@@ -51,11 +60,34 @@ myDB(async client => {
       io.emit('user count', currentUsers);
       console.log('A user has disconnected!')
     })
-  })
+  });
+
+  io.use(
+    passportSocketIo.authorize({
+      cookieParser: cookieParser,
+      key: 'express.sid',
+      secret: process.env.SESSION_SECRET,
+      store: store,
+      success: onAuthorizeSuccess,
+      fail: onAuthorizeFail
+    })
+  );
 }).catch(e => {
   app.route('/').get((req, res) => {
     res.render('index', { title: e, message: 'Unable to connect to database' });
   });
+
+  function onAuthorizeSuccess(data, accept) {
+    console.log('successful connection to socket.io');
+  
+    accept(null, true);
+  }
+  
+  function onAuthorizeFail(data, message, error, accept) {
+    if (error) throw new Error(message);
+    console.log('failed connection to socket.io:', message);
+    accept(null, false);
+  }
 
   io.on('connection', socket => {
     console.log('A user has connected!')
