@@ -11,7 +11,7 @@ const MongoStore = require('connect-mongo')(session);
 const cookieParser = require('cookie-parser');
 
 const URI = process.env.MONGO_URI;
-const store = new MongoStore({ uri: URI });
+const store = new MongoStore({ url: URI });
 
 const routes = require('./routes.js');
 const auth = require('./auth.js');
